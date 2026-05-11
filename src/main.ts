@@ -6,8 +6,8 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const allowedOrigins = [
-    'https://yoklamamhazir.com',
-    'https://www.yoklamamhazir.com',
+    'https://osmanbeyemekcilik.com.tr',
+    'https://www.osmanbeyemekcilik.com.tr',
   ];
   const localOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/;
 

@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GlobalRole {
+  SUPER_ADMIN
+  GLOBAL_MANAGER
+}
+
+enum InstitutionRole {
+  INSTITUTION_ADMIN
+  RECORDER
+  VIEWER
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+}
+
+model User {
+  id                    String           @id @default(uuid()) @db.Uuid
+  email                 String           @unique
+  passwordHash          String
+  fullName              String?
+  globalRole            GlobalRole?
+  institutionId         String?          @db.Uuid
+  institution           Institution?     @relation(fields: [institutionId], references: [id])
+  institutionRole       InstitutionRole?
+  assignedClassGroupIds String[]         @default([])
+  isActive              Boolean          @default(true)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  createdAttendance     Attendance[]     @relation("AttendanceCreatedBy")
+
+  @@index([institutionId])
+  @@index([globalRole])
+  @@index([institutionRole])
+}
+
+model Institution {
+  id           String        @id @default(uuid()) @db.Uuid
+  name         String
+  city         String
+  district     String
+  address      String?
+  phone        String?
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  users        User[]
+  classGroups  ClassGroup[]
+  students     Student[]
+  prayerTypes  PrayerType[]
+  attendance   Attendance[]
+
+  @@index([isActive])
+}
+
+model ClassGroup {
+  id            String       @id @default(uuid()) @db.Uuid
+  institutionId String       @db.Uuid
+  institution   Institution  @relation(fields: [institutionId], references: [id])
+  name          String
+  teacherName   String
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  students      Student[]
+
+  @@index([institutionId])
+  @@index([institutionId, isActive])
+}
+
+model Student {
+  id            String       @id @default(uuid()) @db.Uuid
+  institutionId String       @db.Uuid
+  institution   Institution  @relation(fields: [institutionId], references: [id])
+  classGroupId  String       @db.Uuid
+  classGroup    ClassGroup   @relation(fields: [classGroupId], references: [id])
+  fullName      String
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  attendance    Attendance[]
+
+  @@index([institutionId])
+  @@index([classGroupId])
+  @@index([institutionId, isActive])
+}
+
+model PrayerType {
+  id            String       @id @default(uuid()) @db.Uuid
+  institutionId String       @db.Uuid
+  institution   Institution  @relation(fields: [institutionId], references: [id])
+  name          String
+  sortOrder     Int
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  attendance    Attendance[]
+
+  @@index([institutionId])
+  @@index([institutionId, isActive])
+}
+
+model Attendance {
+  id              String           @id @default(uuid()) @db.Uuid
+  institutionId   String           @db.Uuid
+  institution     Institution      @relation(fields: [institutionId], references: [id])
+  studentId       String           @db.Uuid
+  student         Student          @relation(fields: [studentId], references: [id])
+  prayerTypeId    String           @db.Uuid
+  prayerType      PrayerType       @relation(fields: [prayerTypeId], references: [id])
+  date            String
+  status          AttendanceStatus
+  createdByUserId String?          @db.Uuid
+  createdByUser   User?            @relation("AttendanceCreatedBy", fields: [createdByUserId], references: [id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@unique([institutionId, studentId, prayerTypeId, date])
+  @@index([institutionId])
+  @@index([studentId])
+  @@index([prayerTypeId])
+  @@index([institutionId, date])
+}

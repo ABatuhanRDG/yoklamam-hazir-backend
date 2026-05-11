@@ -25,6 +25,34 @@ export class StudentsController {
     return this.studentsService.findAll(user, query);
   }
 
+  @Get(':id/attendance-history')
+  attendanceHistory(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Query()
+    query: {
+      institutionId?: string;
+      startDate?: string;
+      endDate?: string;
+    },
+  ) {
+    return this.studentsService.attendanceHistory(user, id, query);
+  }
+
+  @Get(':id/analytics')
+  analytics(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Query() query: { institutionId?: string },
+  ) {
+    return this.studentsService.analytics(user, id, query);
+  }
+
+  @Get(':id')
+  findOne(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.studentsService.findOne(user, id);
+  }
+
   @Post()
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateStudentDto) {
     return this.studentsService.create(user, dto);

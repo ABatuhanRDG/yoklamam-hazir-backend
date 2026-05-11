@@ -165,6 +165,7 @@ export class StudentsService {
         institutionId: dto.institutionId,
         classGroupId: dto.classGroupId,
         fullName: dto.fullName.trim(),
+        studentNumber: dto.studentNumber?.trim() || null,
       },
       include: { classGroup: true },
     });
@@ -184,6 +185,8 @@ export class StudentsService {
         fullName: dto.fullName?.trim(),
         classGroupId: dto.classGroupId,
         isActive: dto.isActive,
+        studentNumber:
+          dto.studentNumber === undefined ? undefined : dto.studentNumber.trim() || null,
       },
       include: { classGroup: true },
     });

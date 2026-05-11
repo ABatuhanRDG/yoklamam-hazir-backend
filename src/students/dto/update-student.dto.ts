@@ -13,4 +13,8 @@ export class UpdateStudentDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsString()
+  studentNumber?: string;
 }

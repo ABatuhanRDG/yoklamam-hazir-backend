@@ -117,7 +117,10 @@ export class UsersService {
         email,
         passwordHash,
         fullName: dto.fullName?.trim() || null,
-        globalRole: null,
+        globalRole:
+          dto.institutionRole === InstitutionRole.RECORDER
+            ? GlobalRole.GROUP_MANAGER
+            : null,
         institutionId: dto.institutionId,
         institutionRole: dto.institutionRole,
         assignedClassGroupIds: dto.assignedClassGroupIds ?? [],
@@ -161,6 +164,12 @@ export class UsersService {
       institutionRole: dto.institutionRole,
       assignedClassGroupIds: dto.assignedClassGroupIds,
     };
+    const nextInstitutionRole = dto.institutionRole ?? target.institutionRole;
+    if (nextInstitutionRole === InstitutionRole.RECORDER) {
+      data.globalRole = GlobalRole.GROUP_MANAGER;
+    } else if (target.globalRole === GlobalRole.GROUP_MANAGER) {
+      data.globalRole = null;
+    }
 
     if (dto.password) {
       data.passwordHash = await bcrypt.hash(dto.password, 12);

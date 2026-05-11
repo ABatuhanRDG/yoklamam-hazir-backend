@@ -5,14 +5,15 @@
   "description": "Namaz Yoklama multi-institution attendance backend",
   "license": "UNLICENSED",
   "scripts": {
-  "start": "node dist/main.js",
-  "start:dev": "nest start --watch",
-  "build": "prisma generate && nest build",
-  "prisma:generate": "prisma generate",
-  "prisma:migrate": "prisma migrate dev",
-  "prisma:deploy": "prisma migrate deploy",
-  "seed": "prisma db seed"
-},
+    "start": "node dist/main.js",
+    "start:dev": "nest start --watch",
+    "build": "prisma generate && nest build",
+    "import:dorms": "ts-node scripts/import-dorms.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "seed": "prisma db seed"
+  },
   "dependencies": {
     "@nestjs/common": "^10.4.15",
     "@nestjs/config": "^3.3.0",
@@ -28,7 +29,8 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.8",

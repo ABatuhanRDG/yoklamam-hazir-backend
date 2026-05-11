@@ -10,6 +10,7 @@ datasource db {
 enum GlobalRole {
   SUPER_ADMIN
   GLOBAL_MANAGER
+  GROUP_MANAGER
 }
 
 enum InstitutionRole {
@@ -37,6 +38,7 @@ model User {
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
   createdAttendance     Attendance[]     @relation("AttendanceCreatedBy")
+  teachingClassGroups   ClassGroup[]     @relation("ClassGroupTeacher")
 
   @@index([institutionId])
   @@index([globalRole])
@@ -66,6 +68,8 @@ model ClassGroup {
   id            String       @id @default(uuid()) @db.Uuid
   institutionId String       @db.Uuid
   institution   Institution  @relation(fields: [institutionId], references: [id])
+  teacherUserId String?      @db.Uuid
+  teacherUser   User?        @relation("ClassGroupTeacher", fields: [teacherUserId], references: [id], onDelete: SetNull)
   name          String
   teacherName   String
   isActive      Boolean      @default(true)
@@ -73,7 +77,9 @@ model ClassGroup {
   updatedAt     DateTime     @updatedAt
   students      Student[]
 
+  @@unique([institutionId, name])
   @@index([institutionId])
+  @@index([teacherUserId])
   @@index([institutionId, isActive])
 }
 
@@ -83,12 +89,14 @@ model Student {
   institution   Institution  @relation(fields: [institutionId], references: [id])
   classGroupId  String       @db.Uuid
   classGroup    ClassGroup   @relation(fields: [classGroupId], references: [id])
+  studentNumber String?
   fullName      String
   isActive      Boolean      @default(true)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   attendance    Attendance[]
 
+  @@unique([institutionId, studentNumber])
   @@index([institutionId])
   @@index([classGroupId])
   @@index([institutionId, isActive])

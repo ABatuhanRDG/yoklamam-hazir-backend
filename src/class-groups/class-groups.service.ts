@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import {
   applyClassGroupScope,
@@ -39,6 +44,7 @@ export class ClassGroupsService {
     }
     requireInstitutionManagement(user, dto.institutionId);
     await this.ensureActiveInstitution(dto.institutionId);
+    await this.ensureUniqueClassGroupName(dto.institutionId, dto.name);
 
     return this.prisma.classGroup.create({
       data: {
@@ -52,6 +58,9 @@ export class ClassGroupsService {
   async update(user: AuthenticatedUser, id: string, dto: UpdateClassGroupDto) {
     const classGroup = await this.findExisting(id);
     requireInstitutionManagement(user, classGroup.institutionId);
+    if (dto.name) {
+      await this.ensureUniqueClassGroupName(classGroup.institutionId, dto.name, id);
+    }
 
     return this.prisma.classGroup.update({
       where: { id },
@@ -89,5 +98,23 @@ export class ClassGroupsService {
     });
     if (!classGroup) throw new NotFoundException('Class group not found');
     return classGroup;
+  }
+
+  private async ensureUniqueClassGroupName(
+    institutionId: string,
+    name: string,
+    ignoreId?: string,
+  ) {
+    const existing = await this.prisma.classGroup.findFirst({
+      where: {
+        institutionId,
+        name: name.trim(),
+        id: ignoreId ? { not: ignoreId } : undefined,
+      },
+      select: { id: true },
+    });
+    if (existing) {
+      throw new ConflictException('Class group already exists in this institution');
+    }
   }
 }

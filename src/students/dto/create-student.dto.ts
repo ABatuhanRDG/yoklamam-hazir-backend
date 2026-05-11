@@ -1,4 +1,4 @@
-import { IsString, IsUUID, MinLength } from 'class-validator';
+import { IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
 
 export class CreateStudentDto {
   @IsUUID()
@@ -10,4 +10,8 @@ export class CreateStudentDto {
   @IsString()
   @MinLength(2)
   fullName: string;
+
+  @IsOptional()
+  @IsString()
+  studentNumber?: string;
 }
